@@ -1,35 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface Point {
-  x: number;
-  y: number;
-}
-
-type Tool = 
-  | 'select' 
-  | 'pen' 
-  | 'eraser' 
-  | 'text'
-  | 'shape'
-  | 'line'
-  | 'arrow'
-  | 'elbow'
-  | 'curved'
-  | 'rectangle'
-  | 'circle'
-  | 'triangle'
-  | 'diamond'
-  | 'star'
-  | 'chat'
-  | 'callout';
-
-interface DrawOperation {
-  type: Tool;
-  points: Point[];
-  color: string;
-  width: number;
-}
+import type { Tool, Point, DrawOperation } from '../types';
 
 interface WhiteboardState {
   currentTool: Tool;
@@ -47,13 +18,13 @@ interface WhiteboardState {
   setTool: (tool: Tool) => void;
   setColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
+  setScale: (scale: number) => void;
+  setOffset: (offset: Point) => void;
   startOperation: (type: Tool, point: Point) => void;
   addPoint: (point: Point) => void;
   endOperation: () => void;
   undo: () => void;
   redo: () => void;
-  setScale: (scale: number) => void;
-  setOffset: (offset: Point) => void;
   startDragging: (point: Point) => void;
   updateDragging: (point: Point) => void;
   endDragging: () => void;
@@ -77,6 +48,8 @@ export const useWhiteboardStore = create<WhiteboardState>()(
       setTool: (tool) => set({ currentTool: tool }),
       setColor: (color) => set({ currentColor: color }),
       setStrokeWidth: (width) => set({ strokeWidth: width }),
+      setScale: (scale) => set({ scale }),
+      setOffset: (offset) => set({ offset }),
 
       startOperation: (type, point) => {
         if (get().currentOperation) return;
@@ -138,9 +111,6 @@ export const useWhiteboardStore = create<WhiteboardState>()(
         });
       },
 
-      setScale: (scale) => set({ scale }),
-      setOffset: (offset) => set({ offset }),
-
       startDragging: (point) => set({
         isDragging: true,
         lastMousePos: point,
@@ -169,6 +139,11 @@ export const useWhiteboardStore = create<WhiteboardState>()(
     }),
     {
       name: 'whiteboard-storage',
+      partialize: (state) => ({
+        operations: state.operations,
+        history: state.history,
+        historyIndex: state.historyIndex,
+      }),
     }
   )
 );
