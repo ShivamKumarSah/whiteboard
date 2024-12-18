@@ -1,3 +1,33 @@
+export type Tool = 
+  | 'select' 
+  | 'pen' 
+  | 'eraser' 
+  | 'text'
+  | 'shape'
+  | 'line'
+  | 'arrow'
+  | 'elbow'
+  | 'curved'
+  | 'rectangle'
+  | 'circle'
+  | 'triangle'
+  | 'diamond'
+  | 'star'
+  | 'chat'
+  | 'callout';
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface DrawOperation {
+  type: Tool;
+  points: Point[];
+  color: string;
+  width: number;
+}
+
 export interface User {
   id: string;
   email: string;

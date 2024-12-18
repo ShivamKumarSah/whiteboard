@@ -6,36 +6,48 @@ interface Point {
   y: number;
 }
 
+type Tool = 
+  | 'select' 
+  | 'pen' 
+  | 'eraser' 
+  | 'text'
+  | 'shape'
+  | 'line'
+  | 'arrow'
+  | 'elbow'
+  | 'curved'
+  | 'rectangle'
+  | 'circle'
+  | 'triangle'
+  | 'diamond'
+  | 'star'
+  | 'chat'
+  | 'callout';
+
 interface DrawOperation {
-  type: 'draw' | 'erase';
+  type: Tool;
   points: Point[];
   color: string;
   width: number;
 }
 
 interface WhiteboardState {
-  // Drawing state
-  currentTool: 'select' | 'pen' | 'eraser' | 'shape' | 'text';
+  currentTool: Tool;
   currentColor: string;
   strokeWidth: number;
   operations: DrawOperation[];
   currentOperation: DrawOperation | null;
-  
-  // Canvas state
   scale: number;
   offset: Point;
   isDragging: boolean;
   lastMousePos: Point | null;
-  
-  // History
   history: DrawOperation[][];
   historyIndex: number;
   
-  // Actions
-  setTool: (tool: WhiteboardState['currentTool']) => void;
+  setTool: (tool: Tool) => void;
   setColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
-  startOperation: (type: DrawOperation['type'], point: Point) => void;
+  startOperation: (type: Tool, point: Point) => void;
   addPoint: (point: Point) => void;
   endOperation: () => void;
   undo: () => void;
@@ -50,8 +62,7 @@ interface WhiteboardState {
 export const useWhiteboardStore = create<WhiteboardState>()(
   persist(
     (set, get) => ({
-      // Initial state
-      currentTool: 'pen',
+      currentTool: 'select',
       currentColor: '#000000',
       strokeWidth: 2,
       operations: [],
@@ -63,7 +74,6 @@ export const useWhiteboardStore = create<WhiteboardState>()(
       history: [],
       historyIndex: -1,
 
-      // Actions
       setTool: (tool) => set({ currentTool: tool }),
       setColor: (color) => set({ currentColor: color }),
       setStrokeWidth: (width) => set({ strokeWidth: width }),
