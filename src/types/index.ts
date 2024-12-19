@@ -2,6 +2,8 @@ export type Tool =
   | 'select' 
   | 'pen' 
   | 'eraser' 
+  | 'lasso-eraser'
+  | 'element-eraser'
   | 'text'
   | 'shape'
   | 'line'
@@ -22,6 +24,7 @@ export interface Point {
 }
 
 export interface DrawOperation {
+  id: string;
   type: Tool;
   points: Point[];
   color: string;

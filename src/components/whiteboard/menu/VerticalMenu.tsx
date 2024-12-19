@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useWhiteboardStore } from '../../../store/whiteboard';
 import { useKeyboardShortcut } from '../../../hooks/useKeyboardShortcut';
 import { MENU_ITEMS } from './constants';
 import { MenuButton } from './MenuButton';
 import { ShapesSubmenu } from './ShapesSubmenu';
+import { EraserSubmenu } from './EraserSubmenu';
 
 export const VerticalMenu = () => {
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
@@ -14,8 +15,11 @@ export const VerticalMenu = () => {
   MENU_ITEMS.forEach(({ id, shortcut }) => {
     useKeyboardShortcut(shortcut, () => {
       setTool(id);
-      if (id !== 'shape') setActiveSubmenu(null);
-      else setActiveSubmenu(activeSubmenu === 'shape' ? null : 'shape');
+      if (!['shape', 'eraser'].includes(id)) {
+        setActiveSubmenu(null);
+      } else {
+        setActiveSubmenu(activeSubmenu === id ? null : id);
+      }
     });
   });
 
@@ -31,20 +35,23 @@ export const VerticalMenu = () => {
             id={id}
             icon={icon}
             label={label}
-            isActive={currentTool === id}
-            hasSubmenu={id === 'shape'}
-            isSubmenuOpen={activeSubmenu === 'shape'}
+            isActive={currentTool === id || currentTool.includes(id)}
+            hasSubmenu={id === 'shape' || id === 'eraser'}
+            isSubmenuOpen={activeSubmenu === id}
             onClick={() => {
               setTool(id);
-              if (id === 'shape') {
-                setActiveSubmenu(activeSubmenu === 'shape' ? null : 'shape');
+              if (id === 'shape' || id === 'eraser') {
+                setActiveSubmenu(activeSubmenu === id ? null : id);
               } else {
                 setActiveSubmenu(null);
               }
             }}
           />
 
-          {id === 'shape' && activeSubmenu === 'shape' && <ShapesSubmenu />}
+          <AnimatePresence>
+            {activeSubmenu === 'shape' && id === 'shape' && <ShapesSubmenu />}
+            {activeSubmenu === 'eraser' && id === 'eraser' && <EraserSubmenu />}
+          </AnimatePresence>
         </div>
       ))}
     </motion.div>

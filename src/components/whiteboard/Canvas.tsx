@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useWhiteboardStore } from '../../store/whiteboard';
+import { useEraser } from '../../hooks/useEraser';
 import { CURSOR_STYLES } from './menu/constants';
 
 export const Canvas = () => {
@@ -22,6 +23,13 @@ export const Canvas = () => {
     endDragging,
   } = useWhiteboardStore();
 
+  const {
+    handleErase,
+    handleLassoStart,
+    handleLassoEnd,
+    lassoSelection
+  } = useEraser();
+
   const getCanvasPoint = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -39,7 +47,7 @@ export const Canvas = () => {
     if (canvas) {
       canvas.style.cursor = CURSOR_STYLES[currentTool] || 'default';
     }
-  }, [currentTool]);
+  }, [currentTool, strokeWidth]);
 
   const drawOperation = useCallback((ctx: CanvasRenderingContext2D, operation: typeof currentOperation) => {
     if (!operation || operation.points.length < 2) return;
@@ -65,6 +73,31 @@ export const Canvas = () => {
     }
   }, [scale]);
 
+  // Draw lasso selection
+  const drawLassoSelection = useCallback((ctx: CanvasRenderingContext2D) => {
+    if (lassoSelection.points.length < 2) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = '#4f46e5';
+    ctx.lineWidth = 1 / scale;
+    ctx.setLineDash([5 / scale, 5 / scale]);
+    
+    ctx.moveTo(lassoSelection.points[0].x, lassoSelection.points[0].y);
+    lassoSelection.points.forEach((point, i) => {
+      if (i > 0) ctx.lineTo(point.x, point.y);
+    });
+    
+    if (lassoSelection.isComplete) {
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(79, 70, 229, 0.1)';
+      ctx.fill();
+    }
+    
+    ctx.stroke();
+    ctx.restore();
+  }, [lassoSelection, scale]);
+
   // Handle drawing
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -73,38 +106,30 @@ export const Canvas = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Clear and set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Apply transformations
     ctx.setTransform(scale, 0, 0, scale, offset.x, offset.y);
-
-    // Draw background grid
-    const gridSize = 20;
-    ctx.strokeStyle = '#e5e7eb';
-    ctx.lineWidth = 1 / scale;
-
-    for (let x = 0; x < canvas.width; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, canvas.height);
-      ctx.stroke();
-    }
-
-    for (let y = 0; y < canvas.height; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(canvas.width, y);
-      ctx.stroke();
-    }
 
     // Draw all operations
     operations.forEach(op => drawOperation(ctx, op));
     if (currentOperation) {
       drawOperation(ctx, currentOperation);
     }
-  }, [scale, offset, operations, currentOperation, drawOperation]);
+
+    // Draw lasso selection if active
+    if (currentTool === 'lasso-eraser') {
+      drawLassoSelection(ctx);
+    }
+  }, [
+    scale,
+    offset,
+    operations,
+    currentOperation,
+    drawOperation,
+    drawLassoSelection,
+    currentTool
+  ]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button !== 0) return; // Only handle left click
@@ -113,11 +138,14 @@ export const Canvas = () => {
 
     if (e.altKey || currentTool === 'select') {
       startDragging(point);
+    } else if (currentTool.includes('eraser')) {
+      if (currentTool === 'lasso-eraser') {
+        handleLassoStart(point);
+      } else {
+        handleErase(point);
+      }
     } else {
-      startOperation(
-        currentTool === 'eraser' ? 'erase' : 'draw',
-        point
-      );
+      startOperation(currentTool, point);
     }
   };
 
@@ -126,6 +154,8 @@ export const Canvas = () => {
 
     if (isDragging) {
       updateDragging(point);
+    } else if (currentTool.includes('eraser')) {
+      handleErase(point);
     } else if (currentOperation) {
       addPoint(point);
     }
@@ -134,6 +164,8 @@ export const Canvas = () => {
   const handleMouseUp = () => {
     if (isDragging) {
       endDragging();
+    } else if (currentTool === 'lasso-eraser') {
+      handleLassoEnd();
     } else if (currentOperation) {
       endOperation();
     }
@@ -142,7 +174,7 @@ export const Canvas = () => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 touch-none cursor-crosshair"
+      className="absolute inset-0 touch-none"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

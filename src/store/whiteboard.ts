@@ -28,6 +28,8 @@ interface WhiteboardState {
   startDragging: (point: Point) => void;
   updateDragging: (point: Point) => void;
   endDragging: () => void;
+  removeOperation: (id: string) => void;
+  removeOperations: (ids: string[]) => void;
 }
 
 export const useWhiteboardStore = create<WhiteboardState>()(
@@ -55,6 +57,7 @@ export const useWhiteboardStore = create<WhiteboardState>()(
         if (get().currentOperation) return;
 
         const operation: DrawOperation = {
+          id: crypto.randomUUID(),
           type,
           points: [point],
           color: get().currentColor,
@@ -86,6 +89,30 @@ export const useWhiteboardStore = create<WhiteboardState>()(
         set({
           operations: newOperations,
           currentOperation: null,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        });
+      },
+
+      removeOperation: (id) => {
+        const { operations, history } = get();
+        const newOperations = operations.filter(op => op.id !== id);
+        const newHistory = [...history, newOperations];
+        
+        set({
+          operations: newOperations,
+          history: newHistory,
+          historyIndex: newHistory.length - 1,
+        });
+      },
+
+      removeOperations: (ids) => {
+        const { operations, history } = get();
+        const newOperations = operations.filter(op => !ids.includes(op.id));
+        const newHistory = [...history, newOperations];
+        
+        set({
+          operations: newOperations,
           history: newHistory,
           historyIndex: newHistory.length - 1,
         });
