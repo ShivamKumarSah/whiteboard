@@ -20,7 +20,7 @@ export const VerticalMenu = () => {
   });
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       className="absolute left-4 top-1/2 -translate-y-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 flex flex-col gap-2"

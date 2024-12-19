@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useWhiteboardStore } from '../../store/whiteboard';
+import { CURSOR_STYLES } from './menu/constants';
 
 export const Canvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,6 +32,14 @@ export const Canvas = () => {
       y: (e.clientY - rect.top - offset.y) / scale,
     };
   }, [scale, offset]);
+
+  // Update cursor style dynamically
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.style.cursor = CURSOR_STYLES[currentTool] || 'default';
+    }
+  }, [currentTool]);
 
   const drawOperation = useCallback((ctx: CanvasRenderingContext2D, operation: typeof currentOperation) => {
     if (!operation || operation.points.length < 2) return;

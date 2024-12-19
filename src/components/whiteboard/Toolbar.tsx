@@ -1,25 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  MousePointer,
-  Pen,
-  Eraser,
-  Square,
-  Type,
   Image,
   Undo2,
   Redo2,
   Download,
 } from 'lucide-react';
 import { useWhiteboardStore } from '../../store/whiteboard';
-
-const tools = [
-  { id: 'select', icon: MousePointer, label: 'Select' },
-  { id: 'pen', icon: Pen, label: 'Pen' },
-  { id: 'eraser', icon: Eraser, label: 'Eraser' },
-  { id: 'shape', icon: Square, label: 'Shape' },
-  { id: 'text', icon: Type, label: 'Text' },
-];
 
 const colors = [
   '#000000',
@@ -49,21 +36,6 @@ export const Toolbar = () => {
       animate={{ y: 0, opacity: 1 }}
       className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 flex items-center gap-2"
     >
-      {tools.map(({ id, icon: Icon, label }) => (
-        <button
-          key={id}
-          onClick={() => setTool(id as any)}
-          className={`p-2 rounded-lg transition-colors ${
-            currentTool === id
-              ? 'bg-gray-100 dark:bg-gray-700'
-              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-          title={label}
-        >
-          <Icon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-        </button>
-      ))}
-
       <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-2" />
 
       <div className="flex items-center gap-1">
@@ -71,11 +43,10 @@ export const Toolbar = () => {
           <button
             key={color}
             onClick={() => setColor(color)}
-            className={`w-6 h-6 rounded-full border-2 transition-all ${
-              currentColor === color
-                ? 'border-blue-500 scale-110'
-                : 'border-gray-200 dark:border-gray-700 hover:scale-110'
-            }`}
+            className={`w-6 h-6 rounded-full border-2 transition-all ${currentColor === color
+              ? 'border-blue-500 scale-110'
+              : 'border-gray-200 dark:border-gray-700 hover:scale-110'
+              }`}
             style={{ backgroundColor: color }}
           />
         ))}
