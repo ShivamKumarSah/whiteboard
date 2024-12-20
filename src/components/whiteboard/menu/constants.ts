@@ -5,6 +5,7 @@ import {
   Shapes,
   Eraser,
   Pencil,
+  Highlighter,
   Minus,
   MoveUpRight,
   CornerUpRight,
@@ -23,10 +24,15 @@ import type { Tool } from '../../../types';
 
 export const MENU_ITEMS = [
   { id: 'select' as Tool, icon: MousePointer2, label: 'Select (V)', shortcut: 'v' },
-  { id: 'pen' as Tool, icon: Pen, label: 'Freehand (P)', shortcut: 'p' },
+  { id: 'freehand' as Tool, icon: Pen, label: 'Freehand (F)', shortcut: 'f' },
   { id: 'text' as Tool, icon: Type, label: 'Text (T)', shortcut: 't' },
   { id: 'shape' as Tool, icon: Shapes, label: 'Shapes & Lines (S)', shortcut: 's' },
   { id: 'eraser' as Tool, icon: Eraser, label: 'Eraser Tools (E)', shortcut: 'e' },
+] as const;
+
+export const FREEHAND_TOOLS = [
+  { id: 'pen' as Tool, icon: Pencil, label: 'Pen' },
+  { id: 'highlighter' as Tool, icon: Highlighter, label: 'Highlighter' },
 ] as const;
 
 export const LINE_SHAPES = [
@@ -34,7 +40,7 @@ export const LINE_SHAPES = [
   { id: 'arrow' as Tool, icon: MoveUpRight, label: 'Arrow Line' },
   { id: 'elbow' as Tool, icon: CornerUpRight, label: 'Elbow Connector' },
   { id: 'curved' as Tool, icon: Redo, label: 'Curved Arrow' },
-];
+] as const;
 
 export const BASIC_SHAPES = [
   { id: 'rectangle' as Tool, icon: Square, label: 'Rectangle' },
@@ -44,7 +50,13 @@ export const BASIC_SHAPES = [
   { id: 'star' as Tool, icon: Star, label: 'Star' },
   { id: 'chat' as Tool, icon: MessageSquare, label: 'Chat Bubble' },
   { id: 'callout' as Tool, icon: ArrowBigRight, label: 'Callout' },
-];
+] as const;
+
+export const BRUSH_SIZES = [
+  { id: 'small', label: 'Small', size: 2 },
+  { id: 'medium', label: 'Medium', size: 4 },
+  { id: 'large', label: 'Large', size: 8 },
+] as const;
 
 const createEraserCursor = (size: number = 20) => {
   const svg = `
@@ -59,6 +71,8 @@ const createEraserCursor = (size: number = 20) => {
 export const CURSOR_STYLES: Record<Tool, string> = {
   select: 'default',
   pen: 'crosshair',
+  highlighter: 'crosshair',
+  freehand: 'crosshair',
   text: 'text',
   shape: 'crosshair',
   eraser: createEraserCursor(20),

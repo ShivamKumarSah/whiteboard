@@ -1,6 +1,8 @@
 export type Tool = 
   | 'select' 
-  | 'pen' 
+  | 'pen'
+  | 'highlighter'
+  | 'freehand'
   | 'eraser' 
   | 'lasso-eraser'
   | 'element-eraser'
@@ -29,33 +31,7 @@ export interface DrawOperation {
   points: Point[];
   color: string;
   width: number;
+  opacity?: number;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
-}
-
-export interface Whiteboard {
-  id: string;
-  name: string;
-  lastModified: Date;
-  createdBy: string;
-  collaborators: string[];
-  type: 'recent' | 'shared' | 'archived';
-  thumbnail?: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-}
-
-export interface SearchResultType {
-  id: string;
-  name: string;
-  type: string;
-}
+// ... rest of the types remain the same

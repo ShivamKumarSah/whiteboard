@@ -14,7 +14,9 @@ interface WhiteboardState {
   lastMousePos: Point | null;
   history: DrawOperation[][];
   historyIndex: number;
-  
+}
+
+interface WhiteboardActions {
   setTool: (tool: Tool) => void;
   setColor: (color: string) => void;
   setStrokeWidth: (width: number) => void;
@@ -32,9 +34,10 @@ interface WhiteboardState {
   removeOperations: (ids: string[]) => void;
 }
 
-export const useWhiteboardStore = create<WhiteboardState>()(
+export const useWhiteboardStore = create<WhiteboardState & WhiteboardActions>()(
   persist(
     (set, get) => ({
+      // State
       currentTool: 'select',
       currentColor: '#000000',
       strokeWidth: 2,
@@ -47,10 +50,23 @@ export const useWhiteboardStore = create<WhiteboardState>()(
       history: [],
       historyIndex: -1,
 
-      setTool: (tool) => set({ currentTool: tool }),
+      // Actions
+      setTool: (tool) => {
+        if (tool === 'highlighter') {
+          set({ currentTool: tool, strokeWidth: 8 });
+        } else if (tool === 'pen') {
+          set({ currentTool: tool, strokeWidth: 2 });
+        } else {
+          set({ currentTool: tool });
+        }
+      },
+
       setColor: (color) => set({ currentColor: color }),
+      
       setStrokeWidth: (width) => set({ strokeWidth: width }),
+      
       setScale: (scale) => set({ scale }),
+      
       setOffset: (offset) => set({ offset }),
 
       startOperation: (type, point) => {
@@ -62,6 +78,7 @@ export const useWhiteboardStore = create<WhiteboardState>()(
           points: [point],
           color: get().currentColor,
           width: get().strokeWidth,
+          opacity: type === 'highlighter' ? 0.5 : 1,
         };
 
         set({ currentOperation: operation });

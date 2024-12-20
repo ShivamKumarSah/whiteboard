@@ -6,6 +6,7 @@ import { MENU_ITEMS } from './constants';
 import { MenuButton } from './MenuButton';
 import { ShapesSubmenu } from './ShapesSubmenu';
 import { EraserSubmenu } from './EraserSubmenu';
+import { FreehandSubmenu } from './FreehandSubmenu';
 
 export const VerticalMenu = () => {
   const [activeSubmenu, setActiveSubmenu] = useState<string | null>(null);
@@ -15,7 +16,7 @@ export const VerticalMenu = () => {
   MENU_ITEMS.forEach(({ id, shortcut }) => {
     useKeyboardShortcut(shortcut, () => {
       setTool(id);
-      if (!['shape', 'eraser'].includes(id)) {
+      if (!['shape', 'eraser', 'freehand'].includes(id)) {
         setActiveSubmenu(null);
       } else {
         setActiveSubmenu(activeSubmenu === id ? null : id);
@@ -35,12 +36,12 @@ export const VerticalMenu = () => {
             id={id}
             icon={icon}
             label={label}
-            isActive={currentTool === id || currentTool.includes(id)}
-            hasSubmenu={id === 'shape' || id === 'eraser'}
+            isActive={currentTool === id || ['pen', 'highlighter'].includes(currentTool)}
+            hasSubmenu={id === 'shape' || id === 'eraser' || id === 'freehand'}
             isSubmenuOpen={activeSubmenu === id}
             onClick={() => {
               setTool(id);
-              if (id === 'shape' || id === 'eraser') {
+              if (id === 'shape' || id === 'eraser' || id === 'freehand') {
                 setActiveSubmenu(activeSubmenu === id ? null : id);
               } else {
                 setActiveSubmenu(null);
@@ -51,6 +52,7 @@ export const VerticalMenu = () => {
           <AnimatePresence>
             {activeSubmenu === 'shape' && id === 'shape' && <ShapesSubmenu />}
             {activeSubmenu === 'eraser' && id === 'eraser' && <EraserSubmenu />}
+            {activeSubmenu === 'freehand' && id === 'freehand' && <FreehandSubmenu />}
           </AnimatePresence>
         </div>
       ))}
