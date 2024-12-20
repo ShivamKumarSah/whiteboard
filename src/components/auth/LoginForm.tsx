@@ -17,7 +17,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onToggleForm }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
+
     if (!email || !password) {
       setError('Email and password are required');
       return;

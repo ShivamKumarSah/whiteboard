@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAuthStore } from '../store/auth';
-import { TEST_CREDENTIALS } from '../lib/constants';
+import { supabase } from '../lib/supabase';
 
 export const useAuth = () => {
   const { setUser, setIsAuthenticated, setIsLoading } = useAuthStore();
@@ -9,22 +9,34 @@ export const useAuth = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (email === TEST_CREDENTIALS.email && password === TEST_CREDENTIALS.password) {
-        const user = {
-          id: '1',
-          email: TEST_CREDENTIALS.email,
-          name: 'Demo User',
-        };
-        
-        setUser(user);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', data.user.id)
+          .single();
+
+        setUser({
+          id: data.user.id,
+          email: data.user.email!,
+          name: profile?.name || data.user.email!.split('@')[0],
+        });
         setIsAuthenticated(true);
         return { success: true };
       }
-      
-      return { success: false, error: 'Invalid credentials' };
+
+      return { success: false, error: 'No user data returned' };
+    } catch (error) {
+      return { success: false, error: 'An unexpected error occurred' };
     } finally {
       setIsLoading(false);
     }
@@ -34,28 +46,49 @@ export const useAuth = () => {
     setIsLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const user = {
-        id: Date.now().toString(),
+      const { data, error } = await supabase.auth.signUp({
         email,
-        name,
-      };
-      
-      setUser(user);
-      setIsAuthenticated(true);
-      return { success: true };
+        password,
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      if (data.user) {
+        // Create profile
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([{ id: data.user.id, name }]);
+
+        if (profileError) {
+          return { success: false, error: profileError.message };
+        }
+
+        setUser({
+          id: data.user.id,
+          email: data.user.email!,
+          name,
+        });
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+
+      return { success: false, error: 'No user data returned' };
     } catch (error) {
-      return { success: false, error: 'Registration failed' };
+      return { success: false, error: 'An unexpected error occurred' };
     } finally {
       setIsLoading(false);
     }
   }, [setUser, setIsAuthenticated, setIsLoading]);
 
-  const logout = useCallback(() => {
-    setUser(null);
-    setIsAuthenticated(false);
+  const logout = useCallback(async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+    return { success: !error, error: error?.message };
   }, [setUser, setIsAuthenticated]);
 
   return { login, signup, logout };
