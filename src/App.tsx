@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { useAuthStore } from './store/auth';
 import { useThemeStore } from './store/theme';
 import { AuthContainer } from './components/auth/AuthContainer';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { WhiteboardGrid } from './components/whiteboard/WhiteboardGrid';
+import { Whiteboard } from './components/whiteboard/Whiteboard';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
@@ -23,15 +25,20 @@ function App() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
-      <Navbar />
-      <div className="flex-1 flex overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
-          <WhiteboardGrid />
-        </main>
+    <Router>
+      <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
+        <Navbar />
+        <div className="flex-1 flex overflow-hidden">
+          <Sidebar />
+          <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-800">
+            <Routes>
+              <Route path="/" element={<WhiteboardGrid />} />
+              <Route path="/board/:id" element={<Whiteboard />} />
+            </Routes>
+          </main>
+        </div>
       </div>
-    </div>
+    </Router>
   );
 }
 

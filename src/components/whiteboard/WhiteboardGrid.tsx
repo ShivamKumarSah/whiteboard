@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Clock, Share2, Archive } from 'lucide-react';
-import { Whiteboard } from './Whiteboard';
+import { useNavigate } from 'react-router-dom';
 
 const container = {
   hidden: { opacity: 0 },
@@ -19,18 +19,18 @@ const item = {
 };
 
 export const WhiteboardGrid = () => {
-  const [activeWhiteboard, setActiveWhiteboard] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  if (activeWhiteboard) {
-    return <Whiteboard />;
-  }
+  const handleBoardClick = (id: string) => {
+    navigate(`/board/${id}`);
+  };
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => setActiveWhiteboard('new')}
+            onClick={() => handleBoardClick('new')}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
@@ -61,7 +61,7 @@ export const WhiteboardGrid = () => {
             key={i}
             variants={item}
             className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => setActiveWhiteboard(i.toString())}
+            onClick={() => handleBoardClick(i.toString())}
           >
             <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg mb-4"></div>
             <h3 className="font-medium text-gray-900 dark:text-white">Whiteboard {i}</h3>
