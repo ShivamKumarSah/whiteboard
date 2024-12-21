@@ -37,7 +37,7 @@ export interface DrawOperation {
 export interface User {
   id: string;
   email: string;
-  name: string;
+  display_name?: string;
 }
 
 export interface AuthState {
@@ -50,18 +50,7 @@ export interface Board {
   id: string;
   title: string;
   content: DrawOperation[];
-  thumbnail?: string;
   created_at: string;
   updated_at: string;
   owner_id: string;
-  is_template: boolean;
-  is_public: boolean;
-  last_accessed: string;
-}
-
-export interface BoardCollaborator {
-  board_id: string;
-  user_id: string;
-  role: 'viewer' | 'editor';
-  created_at: string;
 }

@@ -13,12 +13,39 @@ export const useBoard = () => {
     setError(null);
 
     try {
+      // Generate thumbnail from canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 200;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not get canvas context');
+
+      // Draw operations on thumbnail canvas
+      operations.forEach(op => {
+        ctx.beginPath();
+        ctx.strokeStyle = op.color;
+        ctx.lineWidth = op.width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (op.points.length > 0) {
+          ctx.moveTo(op.points[0].x, op.points[0].y);
+          op.points.forEach(point => {
+            ctx.lineTo(point.x, point.y);
+          });
+        }
+        ctx.stroke();
+      });
+
+      const thumbnail = canvas.toDataURL('image/png');
+
       const { data, error: saveError } = await supabase
         .from('boards')
         .insert([
           {
             title,
             content: operations,
+            thumbnail,
           },
         ])
         .select()
@@ -88,56 +115,11 @@ export const useBoard = () => {
     }
   }, []);
 
-  const getMyBoards = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('boards')
-        .select('*')
-        .order('last_accessed', { ascending: false });
-
-      if (fetchError) throw fetchError;
-      return data as Board[];
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch boards';
-      setError(message);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const getRecentBoards = useCallback(async (limit: number = 5) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: fetchError } = await supabase
-        .from('boards')
-        .select('*')
-        .order('last_accessed', { ascending: false })
-        .limit(limit);
-
-      if (fetchError) throw fetchError;
-      return data as Board[];
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to fetch recent boards';
-      setError(message);
-      return [];
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
   return {
     isLoading,
     error,
     saveBoard,
     updateBoard,
     getBoard,
-    getMyBoards,
-    getRecentBoards,
   };
 };

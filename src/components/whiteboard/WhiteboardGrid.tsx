@@ -1,29 +1,26 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Clock, Share2, Archive } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const container = {
-  hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 }
-};
+import { useMyBoards } from '../../hooks/useMyBoards';
+import { BoardCard } from './BoardCard';
+import { EmptyBoards } from './EmptyBoards';
 
 export const WhiteboardGrid = () => {
   const navigate = useNavigate();
+  const { boards, isLoading, error } = useMyBoards();
 
   const handleBoardClick = (id: string) => {
     navigate(`/board/${id}`);
   };
+
+  if (error) {
+    return (
+      <div className="p-6 text-center text-red-600">
+        Error loading boards: {error}
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -50,25 +47,36 @@ export const WhiteboardGrid = () => {
         </div>
       </div>
 
-      <motion.div 
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-      >
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-          <motion.div
-            key={i}
-            variants={item}
-            className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer"
-            onClick={() => handleBoardClick(i.toString())}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="bg-white dark:bg-gray-900 p-4 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 animate-pulse"
+            >
+              <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg mb-4" />
+              <div className="h-5 bg-gray-100 dark:bg-gray-800 rounded mb-2" />
+              <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded w-2/3" />
+            </div>
+          ))}
+        </div>
+      ) : boards.length === 0 ? (
+        <EmptyBoards />
+      ) : (
+        <AnimatePresence>
+          <motion.div 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg mb-4"></div>
-            <h3 className="font-medium text-gray-900 dark:text-white">Whiteboard {i}</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Last modified: 2 days ago</p>
+            {boards.map((board) => (
+              <BoardCard
+                key={board.id}
+                board={board}
+                onClick={() => handleBoardClick(board.id)}
+              />
+            ))}
           </motion.div>
-        ))}
-      </motion.div>
+        </AnimatePresence>
+      )}
     </div>
   );
 };
