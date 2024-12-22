@@ -14,6 +14,7 @@ interface WhiteboardState {
   lastMousePos: Point | null;
   history: DrawOperation[][];
   historyIndex: number;
+  selectedElement: DrawOperation | null;
 }
 
 interface WhiteboardActions {
@@ -32,6 +33,8 @@ interface WhiteboardActions {
   endDragging: () => void;
   removeOperation: (id: string) => void;
   removeOperations: (ids: string[]) => void;
+  setSelectedElement: (element: DrawOperation | null) => void;
+  updateElement: (element: DrawOperation) => void;
 }
 
 export const useWhiteboardStore = create<WhiteboardState & WhiteboardActions>()(
@@ -49,6 +52,7 @@ export const useWhiteboardStore = create<WhiteboardState & WhiteboardActions>()(
       lastMousePos: null,
       history: [],
       historyIndex: -1,
+      selectedElement: null,
 
       // Actions
       setTool: (tool) => {
@@ -180,6 +184,23 @@ export const useWhiteboardStore = create<WhiteboardState & WhiteboardActions>()(
         isDragging: false,
         lastMousePos: null,
       }),
+
+      setSelectedElement: (element) => set({ selectedElement: element }),
+
+      updateElement: (element) => {
+        const { operations } = get();
+        const index = operations.findIndex(op => op.id === element.id);
+        if (index === -1) return;
+
+        const newOperations = [...operations];
+        newOperations[index] = element;
+
+        set({
+          operations: newOperations,
+          history: [...get().history, newOperations],
+          historyIndex: get().history.length,
+        });
+      },
     }),
     {
       name: 'whiteboard-storage',

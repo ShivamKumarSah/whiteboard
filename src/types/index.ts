@@ -32,6 +32,11 @@ export interface DrawOperation {
   color: string;
   width: number;
   opacity?: number;
+  text?: string;
+  fontSize?: number;
+  rotation?: number;
+  scaleX?: number;
+  scaleY?: number;
 }
 
 export interface User {
