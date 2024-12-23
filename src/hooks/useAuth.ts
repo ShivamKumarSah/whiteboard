@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useAuthStore } from '../store/auth';
 import { supabase } from '../lib/supabase';
+import { createProfile, getProfile } from '../lib/auth/profile';
 
 export const useAuth = () => {
   const { setUser, setIsAuthenticated, setIsLoading } = useAuthStore();
@@ -19,16 +20,12 @@ export const useAuth = () => {
       }
 
       if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', data.user.id)
-          .single();
-
+        const profile = await getProfile(data.user.id);
+        
         setUser({
           id: data.user.id,
           email: data.user.email!,
-          name: profile?.name || data.user.email!.split('@')[0],
+          name: profile.data?.name || data.user.email!.split('@')[0],
         });
         setIsAuthenticated(true);
         return { success: true };
@@ -57,12 +54,9 @@ export const useAuth = () => {
 
       if (data.user) {
         // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{ id: data.user.id, name }]);
-
-        if (profileError) {
-          return { success: false, error: profileError.message };
+        const result = await createProfile(data.user.id, name);
+        if (!result.success) {
+          return { success: false, error: result.error };
         }
 
         setUser({

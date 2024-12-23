@@ -1,20 +1,22 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Settings, User, CreditCard, LayoutGrid, Clock, Share2, Archive, BookTemplate, Users, History } from 'lucide-react';
 import { useSidebarStore } from '../../store/sidebar';
 import { cn } from '../../lib/utils';
 
 const menuItems = [
-  { icon: LayoutGrid, label: 'My Boards' },
-  { icon: Clock, label: 'Recent' },
-  { icon: BookTemplate, label: 'Templates' },
-  { icon: Share2, label: 'Projects' },
-  { icon: Users, label: 'Team' },
-  { icon: History, label: 'History' },
+  { id: 'boards', icon: LayoutGrid, label: 'My Boards', path: '/' },
+  { id: 'recent', icon: Clock, label: 'Recent', path: '/recent' },
+  { id: 'templates', icon: BookTemplate, label: 'Templates', path: '/templates' },
+  { id: 'projects', icon: Share2, label: 'Projects', path: '/projects' },
+  { id: 'team', icon: Users, label: 'Team', path: '/team' },
+  { id: 'history', icon: History, label: 'History', path: '/history' },
 ];
 
 export const Sidebar = () => {
   const { isOpen } = useSidebarStore();
+  const navigate = useNavigate();
 
   return (
     <AnimatePresence>
@@ -36,8 +38,9 @@ export const Sidebar = () => {
             <nav className="mt-4 space-y-1">
               {menuItems.map((item) => (
                 <button
-                  key={item.label}
-                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                  key={item.id}
+                  onClick={() => navigate(item.path)}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
                   <item.icon className="w-5 h-5" />
                   <span className="truncate">{item.label}</span>

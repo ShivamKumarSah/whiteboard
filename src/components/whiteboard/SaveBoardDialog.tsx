@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
-import { useSaveBoard } from '../../hooks/useSaveBoard';
+import { supabase } from '../../lib/supabase';
+import { useAuthStore } from '../../store/auth';
 import type { DrawOperation } from '../../types';
 
 interface SaveBoardDialogProps {
@@ -18,19 +19,76 @@ export const SaveBoardDialog: React.FC<SaveBoardDialogProps> = ({
   onSaveSuccess
 }) => {
   const [title, setTitle] = useState('');
-  const { saveBoard, isLoading, error } = useSaveBoard();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const user = useAuthStore((state) => state.user);
 
   if (!isOpen) return null;
 
   const handleSave = async () => {
-    const result = await saveBoard({
-      title: title.trim() || 'Untitled Board',
-      content: operations
-    });
+    if (!user) {
+      setError('You must be logged in to save a board');
+      return;
+    }
 
-    if (result.success) {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Generate thumbnail
+      const canvas = document.createElement('canvas');
+      canvas.width = 300;
+      canvas.height = 200;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Could not get canvas context');
+
+      // Set white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Scale operations to fit thumbnail
+      const scale = 0.2;
+      ctx.scale(scale, scale);
+
+      // Draw operations
+      operations.forEach(op => {
+        if (op.points.length < 2) return;
+
+        ctx.beginPath();
+        ctx.strokeStyle = op.color;
+        ctx.lineWidth = op.width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.globalAlpha = op.opacity ?? 1;
+
+        ctx.moveTo(op.points[0].x, op.points[0].y);
+        op.points.forEach(point => {
+          ctx.lineTo(point.x, point.y);
+        });
+        ctx.stroke();
+      });
+
+      const thumbnail = canvas.toDataURL('image/png');
+
+      const { error: saveError } = await supabase
+        .from('boards')
+        .insert([
+          {
+            title: title.trim() || 'Untitled Board',
+            content: operations,
+            thumbnail,
+            owner_id: user.id
+          }
+        ]);
+
+      if (saveError) throw saveError;
+
       onSaveSuccess();
       onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save board');
+    } finally {
+      setIsLoading(false);
     }
   };
 

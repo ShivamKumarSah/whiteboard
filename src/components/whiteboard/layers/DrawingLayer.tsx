@@ -38,7 +38,7 @@ export const DrawingLayer = () => {
         return (
           <Line
             key={operation.id}
-            points={operation.points.flatMap(p => [p.x, p.y])}
+            points={operation.points.flatMap((p, i) => [p.x, p.y])}
             stroke={operation.color}
             strokeWidth={operation.width}
             tension={0.5}
