@@ -8,8 +8,9 @@ import { Sidebar } from './components/layout/Sidebar';
 import { WhiteboardGrid } from './components/whiteboard/WhiteboardGrid';
 import { Whiteboard } from './components/whiteboard/Whiteboard';
 import { SettingsPage } from './components/settings/SettingsPage';
+import { ProfilePage } from './components/profile/ProfilePage';
 
-function App() {
+export default function App() {
   const { isAuthenticated } = useAuthStore();
   const isDark = useThemeStore((state) => state.isDark);
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/" element={<WhiteboardGrid />} />
               <Route path="/board/:id" element={<Whiteboard />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </main>
         </div>
@@ -43,5 +45,3 @@ function App() {
     </Router>
   );
 }
-
-export default App;

@@ -14,6 +14,12 @@ const menuItems = [
   { id: 'history', icon: History, label: 'History', path: '/history' },
 ];
 
+const bottomMenuItems = [
+  { id: 'profile', icon: User, label: 'Profile', path: '/profile' },
+  { id: 'settings', icon: Settings, label: 'Settings', path: '/settings' },
+  { id: 'billing', icon: CreditCard, label: 'Plan', path: '/billing' },
+];
+
 export const Sidebar = () => {
   const { isOpen } = useSidebarStore();
   const navigate = useNavigate();
@@ -52,21 +58,16 @@ export const Sidebar = () => {
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <nav className="space-y-1">
-            <button 
-              onClick={() => navigate('/settings')}
-              className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-            >
-              <Settings className="w-5 h-5" />
-              Settings
-            </button>
-            <button className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
-              <User className="w-5 h-5" />
-              Profile
-            </button>
-            <button className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
-              <CreditCard className="w-5 h-5" />
-              Plan
-            </button>
+            {bottomMenuItems.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => navigate(item.path)}
+                className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+              >
+                <item.icon className="w-5 h-5" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            ))}
           </nav>
         </div>
       </motion.div>
