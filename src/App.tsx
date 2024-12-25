@@ -7,6 +7,7 @@ import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import { WhiteboardGrid } from './components/whiteboard/WhiteboardGrid';
 import { Whiteboard } from './components/whiteboard/Whiteboard';
+import { SettingsPage } from './components/settings/SettingsPage';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
@@ -34,6 +35,7 @@ function App() {
             <Routes>
               <Route path="/" element={<WhiteboardGrid />} />
               <Route path="/board/:id" element={<Whiteboard />} />
+              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </main>
         </div>

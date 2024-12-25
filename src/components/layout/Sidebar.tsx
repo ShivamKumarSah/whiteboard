@@ -52,7 +52,10 @@ export const Sidebar = () => {
 
         <div className="p-4 border-t border-gray-200 dark:border-gray-700">
           <nav className="space-y-1">
-            <button className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg">
+            <button 
+              onClick={() => navigate('/settings')}
+              className="flex items-center gap-2 w-full px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            >
               <Settings className="w-5 h-5" />
               Settings
             </button>
